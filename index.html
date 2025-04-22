@@ -91,6 +91,22 @@
 
   <button onclick="showWalletModal()">Подключить кошелёк</button>
   <div id="wallet-address"></div>
+  
+
+  <button onclick="buyPremium()">Купить Premium</button>
+
+
+  <button onclick="buyStars()">Купить Stars</button>
+
+  <h2>Купить Telegram Stars</h2>
+  <input type="text" id="stars-username" placeholder="@ваш_телеграм">
+  <input type="number" id="stars-amount" placeholder="Количество Stars">
+  
+
+  <p>Ваша реферальная ссылка:</p>
+  <code id="ref-link">—</code>
+
+  <!-- МОДАЛЬНОЕ ОКНО -->
   <script>
   const tonConnect = new TON_CONNECT.TonConnect();
 
@@ -109,30 +125,6 @@
     }
   }
 </script>
-
-  <button onclick="buyPremium()">Купить Premium</button>
-
-
-  <button onclick="buyStars()">Купить Stars</button>
-
-  <h2>Купить Telegram Stars</h2>
-  <input type="text" id="stars-username" placeholder="@ваш_телеграм">
-  <input type="number" id="stars-amount" placeholder="Количество Stars">
-  
-
-  <p>Ваша реферальная ссылка:</p>
-  <code id="ref-link">—</code>
-
-  <!-- МОДАЛЬНОЕ ОКНО -->
-  <div id="walletModal" class="modal">
-    <div class="modal-content">
-      <h3>Выберите кошелёк:</h3>
-      <div class="wallet-option" onclick="connectVia('tonkeeper')">Tonkeeper</div>
-      <div class="wallet-option" onclick="connectVia('telegram')">Telegram Wallet</div>
-      <div class="wallet-option" onclick="connectVia('tonhub')">Tonhub</div>
-      <button onclick="closeWalletModal()" style="margin-top: 10px;">Закрыть</button>
-    </div>
-  </div>
 
   <script>
     let userWallet = null;
