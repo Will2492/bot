@@ -103,15 +103,26 @@
   <code id="ref-link">—</code>
 
   <!-- МОДАЛЬНОЕ ОКНО -->
-  <div id="walletModal" class="modal">
-    <div class="modal-content">
-      <h3>Выберите кошелёк:</h3>
-      <div class="wallet-option" onclick="connectVia('tonkeeper')">Tonkeeper</div>
-      <div class="wallet-option" onclick="connectVia('telegram')">Telegram Wallet</div>
-      <div class="wallet-option" onclick="connectVia('tonhub')">Tonhub</div>
-      <button onclick="closeWalletModal()" style="margin-top: 10px;">Закрыть</button>
-    </div>
-  </div>
+   <button onclick="showWalletModal()">Подключить кошелёк</button>
+  <div id="wallet-address"></div>
+  <script>
+  const tonConnect = new TON_CONNECT.TonConnect();
+
+  async function connectTON() {
+    try {
+      await tonConnect.restoreConnection();
+
+      const wallet = await tonConnect.connectWallet();
+      const userWallet = wallet.account.address;
+      document.getElementById("wallet-address").innerText = "Кошелёк: " + userWallet;
+
+      const refLink = window.location.origin + "?ref=" + userWallet;
+      document.getElementById("ref-link").innerText = refLink;
+    } catch (e) {
+      alert("Ошибка подключения: " + e.message);
+    }
+  }
+</script>
 
   <script>
     let userWallet = null;
