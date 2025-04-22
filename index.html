@@ -4,38 +4,76 @@
   <meta charset="UTF-8">
   <title>TON Premium и Stars</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- TON Connect SDK -->
-  <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect.min.js"></script>
-
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #0f0f0f;
-      color: white;
+      color: #fff;
       text-align: center;
-      padding: 30px 15px;
+      padding: 40px 20px;
     }
 
     button {
-      background: #00bfa5;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
+      padding: 12px 24px;
       margin: 10px;
+      background: #00bfa5;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
     }
 
     input {
-      background: #1f1f1f;
-      border: 1px solid #444;
-      color: white;
+      margin: 10px;
       padding: 10px;
-      border-radius: 5px;
+      font-size: 16px;
       width: 260px;
-      margin: 8px;
+      border-radius: 5px;
+      border: 1px solid #444;
+      background: #1f1f1f;
+      color: white;
+    }
+
+    #wallet-address {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: left;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .wallet-option {
+      background: #2c2c2c;
+      margin: 10px 0;
+      padding: 12px;
+      border: 1px solid #444;
+      cursor: pointer;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .wallet-option:hover {
+      background: #00bfa5;
+      color: black;
     }
 
     code {
@@ -51,65 +89,73 @@
 
   <h1>Купить Telegram Premium и Stars через TON</h1>
 
-  <!-- Кнопка подключения -->
-  <button onclick="connectTON()">Подключить кошелёк</button>
+  <button onclick="showWalletModal()">Подключить кошелёк</button>
   <div id="wallet-address"></div>
 
-  <!-- Покупка Premium -->
-  <button onclick="buyPremium()">Купить Telegram Premium</button>
+  <button onclick="buyPremium()">Купить Premium</button>
 
-  <!-- Покупка Stars -->
   <h2>Купить Telegram Stars</h2>
   <input type="text" id="stars-username" placeholder="@ваш_телеграм">
   <input type="number" id="stars-amount" placeholder="Количество Stars">
-  <br>
   <button onclick="buyStars()">Купить Stars</button>
 
-  <!-- Реферальная ссылка -->
   <p>Ваша реферальная ссылка:</p>
   <code id="ref-link">—</code>
 
+  <!-- МОДАЛЬНОЕ ОКНО -->
+  <div id="walletModal" class="modal">
+    <div class="modal-content">
+      <h3>Выберите кошелёк:</h3>
+      <div class="wallet-option" onclick="connectVia('tonkeeper')">Tonkeeper</div>
+      <div class="wallet-option" onclick="connectVia('telegram')">Telegram Wallet</div>
+      <div class="wallet-option" onclick="connectVia('tonhub')">Tonhub</div>
+      <button onclick="closeWalletModal()" style="margin-top: 10px;">Закрыть</button>
+    </div>
+  </div>
+
+  <script>
     let userWallet = null;
-    const receiverAddress = "EQCXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; // ← ваш TON адрес
+    const receiverAddress = "EQCXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; // ← ВСТАВЬТЕ СЮДА СВОЙ TON-АДРЕС
 
-    async function connectTON() {
-      try {
-        await tonConnect.restoreConnection();
+    function showWalletModal() {
+      document.getElementById("walletModal").style.display = "flex";
+    }
 
-        const wallet = await tonConnect.connectWallet();
-        userWallet = wallet.account.address;
+    function closeWalletModal() {
+      document.getElementById("walletModal").style.display = "none";
+    }
 
-        document.getElementById("wallet-address").innerText = "Кошелёк: " + userWallet;
-        document.getElementById("ref-link").innerText = window.location.origin + "?ref=" + userWallet;
-      } catch (err) {
-        alert("Ошибка подключения: " + err.message);
+    function connectVia(wallet) {
+      closeWalletModal();
+
+      if (wallet === "tonkeeper") {
+        if (!window.ton) {
+          alert("Установите Tonkeeper кошелёк");
+          return;
+        }
+        window.ton.connect().then(result => {
+          userWallet = result.account.address;
+          document.getElementById("wallet-address").textContent = "Кошелёк: " + userWallet;
+          const refLink = window.location.origin + "?ref=" + userWallet;
+          document.getElementById("ref-link").textContent = refLink;
+        }).catch(err => {
+          alert("Ошибка подключения: " + err.message);
+        });
+      }
+
+      if (wallet === "telegram") {
+        const link = "https://wallet.tg/";
+        window.open(link, "_blank");
+      }
+
+      if (wallet === "tonhub") {
+        const link = "https://tonhub.com/connect";
+        window.open(link, "_blank");
       }
     }
 
     function buyPremium() {
-      if (!userWallet) return alert("Сначала подключите кошелёк");
-      const amountTON = 3;
-      const comment = "Telegram Premium";
-      window.location.href = `ton://transfer/${receiverAddress}?amount=${amountTON * 1e9}&text=${encodeURIComponent(comment)}`;
-    }
-
-    function buyStars() {
-      if (!userWallet) return alert("Сначала подключите кошелёк");
-
-      const username = document.getElementById("stars-username").value.trim();
-      const amount = parseInt(document.getElementById("stars-amount").value);
-      if (!username || !amount || amount <= 0) {
-        alert("Введите корректные данные");
+      if (!userWallet) {
+        alert("Сначала подключите кошелёк");
         return;
       }
-
-      const pricePerStar = 0.03;
-      const total = (pricePerStar * amount).toFixed(3);
-      const comment = `Telegram Stars для ${username}, ${amount} шт.`;
-
-      window.location.href = `ton://transfer/${receiverAddress}?amount=${total * 1e9}&text=${encodeURIComponent(comment)}`;
-    }
-  </script>
-
-</body>
-</html>
