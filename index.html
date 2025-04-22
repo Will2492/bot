@@ -53,55 +53,59 @@
   <code id="ref-link">—</code>
 
   <script>
-    let userWallet = null;
+  let userWallet = null;
+  const receiverAddress = "EQCXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; // ← ВСТАВЬТЕ СЮДА СВОЙ АДРЕС
 
-    async function connectWallet() {
-      try {
-        const ton = window.ton;
-        if (!ton) {
-          alert("Установите Tonkeeper или Ton Wallet!");
-          return;
-        }
-
-        const result = await ton.connect({ onlyIfTrusted: false });
-        userWallet = result.account.address;
-        document.getElementById("wallet-address").textContent = "Кошелёк: " + userWallet;
-
-        const refLink = window.location.origin + "?ref=" + userWallet;
-        document.getElementById("ref-link").textContent = refLink;
-      } catch (e) {
-        alert("Ошибка подключения: " + e.message);
-      }
-    }
-
-    function buyPremium() {
-      if (!userWallet) {
-        alert("Сначала подключите кошелёк");
+  async function connectWallet() {
+    try {
+      const ton = window.ton;
+      if (!ton) {
+        alert("Установите Tonkeeper или Ton Wallet!");
         return;
       }
 
-      // Здесь будет отправка TON на адрес и вызов backend для покупки Premium
-      alert("Покупка Telegram Premium оформлена (заглушка)");
+      const result = await ton.connect({ onlyIfTrusted: false });
+      userWallet = result.account.address;
+      document.getElementById("wallet-address").textContent = "Кошелёк: " + userWallet;
+
+      const refLink = window.location.origin + "?ref=" + userWallet;
+      document.getElementById("ref-link").textContent = refLink;
+    } catch (e) {
+      alert("Ошибка подключения: " + e.message);
+    }
+  }
+
+  function buyPremium() {
+    if (!userWallet) {
+      alert("Сначала подключите кошелёк");
+      return;
     }
 
-    function buyStars() {
-      if (!userWallet) {
-        alert("Сначала подключите кошелёк");
-        return;
-      }
+    const amountTON = 3; // цена Telegram Premium, например 3 TON
+    const comment = "Telegram Premium";
 
-      const username = document.getElementById("stars-username").value.trim();
-      const amount = parseInt(document.getElementById("stars-amount").value);
+    window.location.href = `ton://transfer/${receiverAddress}?amount=${amountTON * 1e9}&text=${encodeURIComponent(comment)}`;
+  }
 
-      if (!username || !amount || amount <= 0) {
-        alert("Введите корректные данные для покупки Stars");
-        return;
-      }
-
-      // Тут можно отправить эти данные на сервер (или напрямую выполнить транзакцию)
-      alert(`Оформлена покупка ${amount} Stars для ${username} (заглушка)`);
+  function buyStars() {
+    if (!userWallet) {
+      alert("Сначала подключите кошелёк");
+      return;
     }
-  </script>
 
+    const username = document.getElementById("stars-username").value.trim();
+    const amount = parseInt(document.getElementById("stars-amount").value);
+    if (!username || !amount || amount <= 0) {
+      alert("Введите корректные данные для покупки Stars");
+      return;
+    }
+
+    const pricePerStar = 0.03; // примерная цена 1 Stars
+    const total = (pricePerStar * amount).toFixed(3);
+    const comment = `Telegram Stars для ${username}, ${amount} шт.`;
+
+    window.location.href = `ton://transfer/${receiverAddress}?amount=${total * 1e9}&text=${encodeURIComponent(comment)}`;
+  }
+</script>
 </body>
 </html>
