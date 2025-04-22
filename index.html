@@ -4,76 +4,38 @@
   <meta charset="UTF-8">
   <title>TON Premium и Stars</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- TON Connect SDK -->
+  <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect.min.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #0f0f0f;
-      color: #fff;
+      color: white;
       text-align: center;
-      padding: 40px 20px;
+      padding: 30px 15px;
     }
 
     button {
-      padding: 12px 24px;
-      margin: 10px;
       background: #00bfa5;
-      border: none;
-      border-radius: 6px;
       color: white;
-      cursor: pointer;
+      border: none;
+      padding: 12px 20px;
       font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 10px;
     }
 
     input {
-      margin: 10px;
-      padding: 10px;
-      font-size: 16px;
-      width: 260px;
-      border-radius: 5px;
-      border: 1px solid #444;
       background: #1f1f1f;
-      color: white;
-    }
-
-    #wallet-address {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #ccc;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 9999;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: #1e1e1e;
-      padding: 30px;
-      border-radius: 10px;
-      text-align: left;
-      width: 90%;
-      max-width: 400px;
-    }
-
-    .wallet-option {
-      background: #2c2c2c;
-      margin: 10px 0;
-      padding: 12px;
       border: 1px solid #444;
-      cursor: pointer;
-      border-radius: 6px;
-      text-align: center;
-    }
-
-    .wallet-option:hover {
-      background: #00bfa5;
-      color: black;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      width: 260px;
+      margin: 8px;
     }
 
     code {
@@ -89,105 +51,61 @@
 
   <h1>Купить Telegram Premium и Stars через TON</h1>
 
-    <button onclick="connectTON()">Подключить кошелёк</button>
-    <div id="wallet-address"></div>
-  <script>
-  const tonConnect = new TON_CONNECT.TonConnect();
+  <!-- Кнопка подключения -->
+  <button onclick="connectTON()">Подключить кошелёк</button>
+  <div id="wallet-address"></div>
 
-  async function connectTON() {
-    try {
-      await tonConnect.restoreConnection();
+  <!-- Покупка Premium -->
+  <button onclick="buyPremium()">Купить Telegram Premium</button>
 
-      const wallet = await tonConnect.connectWallet();
-      const userWallet = wallet.account.address;
-      document.getElementById("wallet-address").innerText = "Кошелёк: " + userWallet;
-
-      const refLink = window.location.origin + "?ref=" + userWallet;
-      document.getElementById("ref-link").innerText = refLink;
-    } catch (e) {
-      alert("Ошибка подключения: " + e.message);
-    }
-  }
-</script>
-  
-
-  <button onclick="buyPremium()">Купить Premium</button>
-
-
-  <button onclick="buyStars()">Купить Stars</button>
-
+  <!-- Покупка Stars -->
   <h2>Купить Telegram Stars</h2>
   <input type="text" id="stars-username" placeholder="@ваш_телеграм">
   <input type="number" id="stars-amount" placeholder="Количество Stars">
-  
+  <br>
+  <button onclick="buyStars()">Купить Stars</button>
 
+  <!-- Реферальная ссылка -->
   <p>Ваша реферальная ссылка:</p>
   <code id="ref-link">—</code>
-  
 
   <script>
+    // Инициализация TON Connect
+    const tonConnect = new TON_CONNECT.TonConnect({
+      manifestUrl: 'https://yourdomain.com/tonconnect-manifest.json' // ← замените на ваш URL!
+    });
+
     let userWallet = null;
-    const receiverAddress = "EQCXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; // ← ВСТАВЬТЕ СЮДА СВОЙ TON-АДРЕС
+    const receiverAddress = "EQCXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; // ← ваш TON адрес
 
-    function showWalletModal() {
-      document.getElementById("walletModal").style.display = "flex";
-    }
+    async function connectTON() {
+      try {
+        await tonConnect.restoreConnection();
 
-    function closeWalletModal() {
-      document.getElementById("walletModal").style.display = "none";
-    }
+        const wallet = await tonConnect.connectWallet();
+        userWallet = wallet.account.address;
 
-    function connectVia(wallet) {
-      closeWalletModal();
-
-      if (wallet === "tonkeeper") {
-        if (!window.ton) {
-          alert("Установите Tonkeeper кошелёк");
-          return;
-        }
-        window.ton.connect().then(result => {
-          userWallet = result.account.address;
-          document.getElementById("wallet-address").textContent = "Кошелёк: " + userWallet;
-          const refLink = window.location.origin + "?ref=" + userWallet;
-          document.getElementById("ref-link").textContent = refLink;
-        }).catch(err => {
-          alert("Ошибка подключения: " + err.message);
-        });
-      }
-
-      if (wallet === "telegram") {
-        const link = "https://wallet.tg/";
-        window.open(link, "_blank");
-      }
-
-      if (wallet === "tonhub") {
-        const link = "https://tonhub.com/connect";
-        window.open(link, "_blank");
+        document.getElementById("wallet-address").innerText = "Кошелёк: " + userWallet;
+        document.getElementById("ref-link").innerText = window.location.origin + "?ref=" + userWallet;
+      } catch (err) {
+        alert("Ошибка подключения: " + err.message);
       }
     }
 
     function buyPremium() {
-      if (!userWallet) {
-        alert("Сначала подключите кошелёк");
-        return;
-      }
-
-      const amountTON = 3; // Цена Telegram Premium
+      if (!userWallet) return alert("Сначала подключите кошелёк");
+      const amountTON = 3;
       const comment = "Telegram Premium";
-
       window.location.href = `ton://transfer/${receiverAddress}?amount=${amountTON * 1e9}&text=${encodeURIComponent(comment)}`;
     }
 
     function buyStars() {
-      if (!userWallet) {
-        alert("Сначала подключите кошелёк");
-        return;
-      }
+      if (!userWallet) return alert("Сначала подключите кошелёк");
 
       const username = document.getElementById("stars-username").value.trim();
       const amount = parseInt(document.getElementById("stars-amount").value);
       if (!username || !amount || amount <= 0) {
-        alert("Введите корректные данные для покупки Stars");
+        alert("Введите корректные данные");
         return;
       }
 
