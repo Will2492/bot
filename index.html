@@ -69,9 +69,11 @@
   <p>Ваша реферальная ссылка:</p>
   <code id="ref-link">—</code>
 
-  <script>
-    <!-- Кнопка подключения -->
+  
+    <!-- TON Connect SDK -->
+  <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect.min.js"></script>
   <button onclick="connectTON()">Подключить кошелёк</button>
+  <script>
     // Инициализация TON Connect
    import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
