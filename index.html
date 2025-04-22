@@ -89,23 +89,6 @@
 
   <h1>Купить Telegram Premium и Stars через TON</h1>
 
-  <button onclick="showWalletModal()">Подключить кошелёк</button>
-  <div id="wallet-address"></div>
-  
-
-  <button onclick="buyPremium()">Купить Premium</button>
-
-
-  <button onclick="buyStars()">Купить Stars</button>
-
-  <h2>Купить Telegram Stars</h2>
-  <input type="text" id="stars-username" placeholder="@ваш_телеграм">
-  <input type="number" id="stars-amount" placeholder="Количество Stars">
-  
-
-  <p>Ваша реферальная ссылка:</p>
-  <code id="ref-link">—</code>
-
     <button onclick="connectTON()">Подключить кошелёк</button>
     <div id="wallet-address"></div>
   <script>
@@ -126,6 +109,21 @@
     }
   }
 </script>
+  
+
+  <button onclick="buyPremium()">Купить Premium</button>
+
+
+  <button onclick="buyStars()">Купить Stars</button>
+
+  <h2>Купить Telegram Stars</h2>
+  <input type="text" id="stars-username" placeholder="@ваш_телеграм">
+  <input type="number" id="stars-amount" placeholder="Количество Stars">
+  
+
+  <p>Ваша реферальная ссылка:</p>
+  <code id="ref-link">—</code>
+  
 
   <script>
     let userWallet = null;
