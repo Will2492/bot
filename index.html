@@ -1,40 +1,78 @@
-import telebot
-from telebot import types
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>TON Premium</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      text-align: center;
+      padding: 50px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      background: #00bfa5;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    #wallet-address {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
 
-API_TOKEN = 'ВСТАВЬ_СЮДА_СВОЙ_API_ТОКЕН'
+  <h1>Купить Telegram Premium через TON</h1>
 
-bot = telebot.TeleBot(API_TOKEN)
+  <button onclick="connectWallet()">Подключить кошелёк</button>
+  <div id="wallet-address"></div>
 
-@bot.message_handler(commands=['start'])
-def send_welcome(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    item1 = types.KeyboardButton("Купить Stars")
-    item2 = types.KeyboardButton("Связаться с поддержкой")
-    markup.add(item1, item2)
-    
-    bot.send_message(
-        message.chat.id,
-        "Привет! Добро пожаловать в магазин Telegram Stars!\nВыберите нужный пункт меню.",
-        reply_markup=markup
-    )
+  <button onclick="buyPremium()">Купить Premium</button>
 
-@bot.message_handler(func=lambda msg: msg.text == "Купить Stars")
-def choose_amount(message):
-    bot.send_message(message.chat.id, "Введите количество Stars, которое хотите купить:")
+  <p>Ваша реферальная ссылка:</p>
+  <code id="ref-link">—</code>
 
-@bot.message_handler(func=lambda msg: msg.text.isdigit())
-def calculate_price(message):
-    stars = int(message.text)
-    price = round(stars * 0.012, 2)  # Примерная цена
-    bot.send_message(
-        message.chat.id,
-        f"Цена за {stars} Stars — примерно {price} TON.\nОтправьте оплату на TON-адрес:\n`EQD...`"
-    )
+  <script>
+    let userWallet = null;
 
-@bot.message_handler(func=lambda msg: msg.text == "Связаться с поддержкой")
-def support(message):
-    bot.send_message(message.chat.id, "Напишите нашему администратору: @yourusername")
+    async function connectWallet() {
+      try {
+        const ton = window.ton; // Встроенный объект Tonkeeper
+        if (!ton) {
+          alert("Установите Tonkeeper или Ton Wallet!");
+          return;
+        }
 
-# Запускаем бота
-print("Бот запущен...")
-bot.infinity_polling()
+        const result = await ton.connect({ onlyIfTrusted: false });
+        userWallet = result.account.address;
+        document.getElementById("wallet-address").textContent = "Кошелёк: " + userWallet;
+
+        // Создаём реферальную ссылку
+        const refLink = window.location.origin + "?ref=" + userWallet;
+        document.getElementById("ref-link").textContent = refLink;
+      } catch (e) {
+        alert("Ошибка подключения: " + e.message);
+      }
+    }
+
+    function buyPremium() {
+      if (!userWallet) {
+        alert("Сначала подключите кошелёк");
+        return;
+      }
+
+      // Здесь должен быть код отправки TON на ваш адрес или вызов бэкенда
+      alert("Операция покупки Premium запущена! (здесь будет отправка TON)");
+    }
+  </script>
+
+</body>
+</html>
