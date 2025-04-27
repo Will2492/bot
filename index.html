@@ -1,172 +1,25 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <title>TON Premium и Stars</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f0f0f;
-      color: #fff;
-      text-align: center;
-      padding: 40px 20px;
-    }
+from flask import Flask, request
+import os
+import time
 
-    button {
-      padding: 12px 24px;
-      margin: 10px;
-      background: #00bfa5;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      cursor: pointer;
-      font-size: 16px;
-    }
+app = Flask(__name__)
 
-    input {
-      margin: 10px;
-      padding: 10px;
-      font-size: 16px;
-      width: 260px;
-      border-radius: 5px;
-      border: 1px solid #444;
-      background: #1f1f1f;
-      color: white;
-    }
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        data = request.form.get('request')
+        save_dir = 'заявки'
+        os.makedirs(save_dir, exist_ok=True)
+        filename = os.path.join(save_dir, f'{int(time.time())}.txt')
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(data)
+        return '✅ Заявка сохранена!'
+    return '''
+        <form method="POST">
+            <textarea name="request" rows="5" cols="30"></textarea><br>
+            <button type="submit">Отправить заявку</button>
+        </form>
+    '''
 
-    #wallet-address {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #ccc;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 9999;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: #1e1e1e;
-      padding: 30px;
-      border-radius: 10px;
-      text-align: left;
-      width: 90%;
-      max-width: 400px;
-    }
-
-    .wallet-option {
-      background: #2c2c2c;
-      margin: 10px 0;
-      padding: 12px;
-      border: 1px solid #444;
-      cursor: pointer;
-      border-radius: 6px;
-      text-align: center;
-    }
-
-    .wallet-option:hover {
-      background: #00bfa5;
-      color: black;
-    }
-
-    code {
-      background: #1c1c1c;
-      padding: 6px 10px;
-      border-radius: 4px;
-      display: inline-block;
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body>
-
-  <h1>Купить Telegram Premium и Stars через TON</h1>
-
-  <button onclick="showWalletModal()">Подключить кошелёк</button>
-  <div id="wallet-address"></div>
-
-  <button onclick="buyPremium()">Купить Premium</button>
-
-  <h2>Купить Telegram Stars</h2>
-  <input type="text" id="stars-username" placeholder="@ваш_телеграм">
-  <input type="number" id="stars-amount" placeholder="Количество Stars">
-  <button onclick="buyStars()">Купить Stars</button>
-
-  <p>Ваша реферальная ссылка:</p>
-  <code id="ref-link">—</code>
-
-  <!-- МОДАЛЬНОЕ ОКНО -->
-   <button onclick="showWalletModal()">Подключить кошелёк</button>
-  <div id="wallet-address"></div>
-  <script>
-  const tonConnect = new TON_CONNECT.TonConnect();
-
-  async function connectTON() {
-    try {
-      await tonConnect.restoreConnection();
-
-      const wallet = await tonConnect.connectWallet();
-      const userWallet = wallet.account.address;
-      document.getElementById("wallet-address").innerText = "Кошелёк: " + userWallet;
-
-      const refLink = window.location.origin + "?ref=" + userWallet;
-      document.getElementById("ref-link").innerText = refLink;
-    } catch (e) {
-      alert("Ошибка подключения: " + e.message);
-    }
-  }
-</script>
-
-  <script>
-    let userWallet = null;
-    const receiverAddress = "EQCXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; // ← ВСТАВЬТЕ СЮДА СВОЙ TON-АДРЕС
-
-    function showWalletModal() {
-      document.getElementById("walletModal").style.display = "flex";
-    }
-
-    function closeWalletModal() {
-      document.getElementById("walletModal").style.display = "none";
-    }
-
-    function connectVia(wallet) {
-      closeWalletModal();
-
-      if (wallet === "tonkeeper") {
-        if (!window.ton) {
-          alert("Установите Tonkeeper кошелёк");
-          return;
-        }
-        window.ton.connect().then(result => {
-          userWallet = result.account.address;
-          document.getElementById("wallet-address").textContent = "Кошелёк: " + userWallet;
-          const refLink = window.location.origin + "?ref=" + userWallet;
-          document.getElementById("ref-link").textContent = refLink;
-        }).catch(err => {
-          alert("Ошибка подключения: " + err.message);
-        });
-      }
-
-      if (wallet === "telegram") {
-        const link = "https://wallet.tg/";
-        window.open(link, "_blank");
-      }
-
-      if (wallet === "tonhub") {
-        const link = "https://tonhub.com/connect";
-        window.open(link, "_blank");
-      }
-    }
-
-    function buyPremium() {
-      if (!userWallet) {
-        alert("Сначала подключите кошелёк");
-        return;
-      }
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
